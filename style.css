@@ -384,6 +384,20 @@ header h1 {
     transform: translateY(-2px);
 }
 
+#qr-code-modal .modal-content {
+    gap: 10px;
+}
+
+/* Khmer font */
+body, h1, h2, h3, h4, h5, h6, button, input, p, span, li, div {
+    font-family: 'Noto Sans Khmer', 'Inter', 'Helvetica Neue', sans-serif;
+}
+
+h1, h2, h3 {
+    font-family: 'Koulen', 'Noto Sans Khmer', sans-serif;
+}
+
+
 /* Print Styles */
 @media print {
     body, .pos-container, .main-content, .content-wrapper, .products-section, .cart-section {

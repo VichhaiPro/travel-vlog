@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
-    const serviceGrid = document.getElementById('product-grid'); // Renamed from product-grid in HTML logic
+    const serviceGrid = document.getElementById('product-grid');
     const cartItemsList = document.getElementById('cart-items');
     const cartSubtotalSpan = document.getElementById('cart-subtotal');
     const cartDiscountSpan = document.getElementById('cart-discount');
@@ -12,8 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const discountInput = document.getElementById('discount-percentage');
 
     // Modal elements
-    const modal = document.getElementById('add-item-modal');
+    const addItemModal = document.getElementById('add-item-modal');
+    const qrCodeModal = document.getElementById('qr-code-modal');
     const closeButton = document.querySelector('.close-button');
+    const qrCloseButton = document.querySelector('.qr-close-button');
     const saveItemButton = document.getElementById('save-item-button');
     const itemNameInput = document.getElementById('item-name-input');
     const itemPriceInput = document.getElementById('item-price-input');
@@ -29,15 +31,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- State ---
     let cart = [];
     let services = [
-        { id: 1, name: 'ម៉ាស្សាបែបស៊ុយអែដ', price: 60.00, image: '' },
-        { id: 2, name: 'ម៉ាស្សាសាច់ដុំជ្រៅ', price: 75.00, image: '' },
-        { id: 3, name: 'ម៉ាស្សាដោយប្រើថ្មក្តៅ', price: 85.00, image: '' },
-        { id: 4, name: 'ម៉ាស្សាមុខដោយប្រើប្រេងក្រអូប', price: 50.00, image: '' },
-        { id: 5, name: 'ធ្វើក្រចកដៃ', price: 30.00, image: '' },
-        { id: 6, name: 'ធ្វើក្រចកជើង', price: 40.00, image: '' },
-        { id: 7, name: 'រុំខ្លួន', price: 90.00, image: '' },
-        { id: 8, name: 'បករោម', price: 25.00, image: '' },
-        { id: 9, name: 'យូហ្គា', price: 20.00, image: '' },
+        { id: 1, name: 'ម៉ាស្សាបែបស៊ុយអែដ', price: 60.00, image: 'https://images.unsplash.com/photo-1544161515-cfd836b04e94?q=80&w=1974&auto=format&fit=crop' },
+        { id: 2, name: 'ម៉ាស្សាសាច់ដុំជ្រៅ', price: 75.00, image: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=2070&auto=format&fit=crop' },
+        { id: 3, name: 'ម៉ាស្សាដោយប្រើថ្មក្តៅ', price: 85.00, image: 'https://images.unsplash.com/photo-1599442315179-9b410984a86f?q=80&w=1974&auto=format&fit=crop' },
+        { id: 4, name: 'ម៉ាស្សាមុខដោយប្រើប្រេងក្រអូប', price: 50.00, image: 'https://images.unsplash.com/photo-1598205499639-58e1927d353b?q=80&w=2070&auto=format&fit=crop' },
+        { id: 5, name: 'ធ្វើក្រចកដៃ', price: 30.00, image: 'https://images.unsplash.com/photo-1604654894610-df63bc595122?q=80&w=2070&auto=format&fit=crop' },
+        { id: 6, name: 'ធ្វើក្រចកជើង', price: 40.00, image: 'https://images.unsplash.com/photo-1596704017254-972127236d87?q=80&w=2070&auto=format&fit=crop' },
+        { id: 7, name: 'រុំខ្លួន', price: 90.00, image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=2070&auto=format&fit=crop' },
+        { id: 8, name: 'បករោម', price: 25.00, image: 'https://images.unsplash.com/photo-1585771816844-a71f034a7fb2?q=80&w=2070&auto=format&fit=crop' },
+        { id: 9, name: 'យូហ្គា', price: 20.00, image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=2120&auto=format&fit=crop' },
     ];
     let discountPercent = 0;
 
@@ -53,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
             serviceElement.className = 'product-item'; // Keep class for styling
             serviceElement.dataset.id = service.id;
             serviceElement.innerHTML = `
+                <img src="${service.image}" alt="${service.name}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 5px;">
                 <h3>${service.name}</h3>
                 <p>$${service.price.toFixed(2)}</p>
             `;
@@ -116,20 +119,18 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("កន្ត្រកទំនិញរបស់អ្នកនៅទទេ!");
             return;
         }
-        alert(`សូមអរគុណសម្រាប់ការទិញទំនិញ! តម្លៃសរុប: $${cartTotalSpan.textContent}`);
-        
-        // Clear cart and discount
-        cart = [];
-        discountPercent = 0;
-        discountInput.value = '';
-        renderCart();
+        toggleModal(qrCodeModal, true);
     }
     
     /**
-     * Shows or hides the custom item modal.
+     * Shows or hides a modal.
      */
-    function toggleModal(show) {
-        modal.style.display = show ? 'flex' : 'none';
+    function toggleModal(modal, show) {
+        if (show) {
+            modal.classList.add('show');
+        } else {
+            modal.classList.remove('show');
+        }
     }
 
     /**
@@ -144,11 +145,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 id: services.length + 1, // Simple ID generation
                 name: name,
                 price: price,
-                image: ''
+                image: 'https://via.placeholder.com/150'
             };
             services.push(newService);
             renderServices();
-            toggleModal(false);
+            toggleModal(addItemModal, false);
             itemNameInput.value = '';
             itemPriceInput.value = '';
         } else {
@@ -187,14 +188,18 @@ document.addEventListener('DOMContentLoaded', () => {
     checkoutButton.addEventListener('click', handleCheckout);
     printInvoiceButton.addEventListener('click', printInvoice);
     applyDiscountButton.addEventListener('click', applyDiscount);
-    addItemButton.addEventListener('click', () => toggleModal(true));
-    closeButton.addEventListener('click', () => toggleModal(false));
+    addItemButton.addEventListener('click', () => toggleModal(addItemModal, true));
+    closeButton.addEventListener('click', () => toggleModal(addItemModal, false));
+    qrCloseButton.addEventListener('click', () => toggleModal(qrCodeModal, false));
     saveItemButton.addEventListener('click', saveCustomItem);
     
     // Close modal if user clicks outside the content area
     window.addEventListener('click', (event) => {
-        if (event.target === modal) {
-            toggleModal(false);
+        if (event.target === addItemModal) {
+            toggleModal(addItemModal, false);
+        }
+        if (event.target === qrCodeModal) {
+            toggleModal(qrCodeModal, false);
         }
     });
 
